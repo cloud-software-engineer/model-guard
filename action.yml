@@ -27,7 +27,12 @@ runs:
       shell: bash
       id: scan
       run: |
-        bee scan . --format json > scan-results.json || true
+        # Escaneamos el directorio actual con el formato correcto
+        bee --format json scan . > scan-results.json || true
+        
+        # Imprimimos el contenido para depurar en los logs de GitHub
+        echo "Contenido del JSON generado:"
+        cat scan-results.json
       continue-on-error: true
 
     - name: Generate PR comment
@@ -37,7 +42,7 @@ runs:
         if [ -s scan-results.json ]; then
           python ${{ github.action_path }}/scripts/generate_comment.py scan-results.json
         else
-          echo "## ⚠️ Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
+          echo "## Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
         fi
 
     - name: Post comment to PR
