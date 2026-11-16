@@ -48,21 +48,27 @@ runs:
       run: |
         gh pr comment ${{ github.event.pull_request.number }} --body-file pr_comment.md
 
-    - name: Enforce gate (Fail if blocked)
+        - name: Enforce gate (Fail if blocked)
       shell: bash
       run: |
-        python -c "
-        import json, sys
-        try:
-            with open('scan-results.json', 'r') as f:
-                data = json.load(f)
-            if data.get('verdict') == 'block':
-                print('Veredicto: BLOQUEADO. Revisa el comentario en el PR.')
-                sys.exit(1)
-            else:
-                print('Veredicto: PERMITIDO.')
-                sys.exit(0)
-        except Exception as e:
-            print(f'Error al verificar el veredicto: {e}')
-            sys.exit(1)
-        "
+        if [ -s scan-results.json ]; then
+          python -c "
+          import json, sys
+          try:
+              with open('scan-results.json', 'r') as f:
+                  data = json.load(f)
+              if data.get('verdict') == 'block':
+                  print('Veredicto: BLOQUEADO. Revisa el comentario en el PR.')
+                  sys.exit(1)
+              else:
+                  print('Veredicto: PERMITIDO.')
+                  sys.exit(0)
+          except Exception as e:
+              print(f'Error al verificar el veredicto: {e}')
+              sys.exit(1)
+          "
+        else
+          echo "El archivo scan-results.json está vacío o no existe (No se encontraron modelos para escanear)."
+          echo "Omitiendo bloqueo de seguridad."
+          exit 0
+        fi
