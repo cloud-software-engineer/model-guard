@@ -1,7 +1,9 @@
 name: Test Model Guard Action
+
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - main
   pull_request:
     paths:
       - '**/*.pkl'
@@ -15,7 +17,10 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Model Guard
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
