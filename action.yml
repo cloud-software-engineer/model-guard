@@ -1,0 +1,68 @@
+name: 'AI Model Security Gate'
+description: 'Escanea artefactos de modelos de IA en busca de código malicioso antes del merge.'
+author: 'Miguel parra'
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  github-token:
+    description: 'Token de GitHub para publicar el comentario'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip install bee-guard
+
+    - name: Run BEE scan
+      shell: bash
+      id: scan
+      run: |
+        bee scan . --format json > scan-results.json || true
+      continue-on-error: true
+
+    - name: Generate PR comment
+      shell: bash
+      if: always()
+      run: |
+        if [ -s scan-results.json ]; then
+          python ${{ github.action_path }}/scripts/generate_comment.py scan-results.json
+        else
+          echo "## Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
+        fi
+
+    - name: Post comment to PR
+      shell: bash
+      if: always() && github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        gh pr comment ${{ github.event.pull_request.number }} --body-file pr_comment.md
+
+    - name: Enforce gate (Fail if blocked)
+      shell: bash
+      run: |
+        python -c "
+        import json, sys
+        try:
+            with open('scan-results.json', 'r') as f:
+                data = json.load(f)
+            if data.get('verdict') == 'block':
+                print('Veredicto: BLOQUEADO. Revisa el comentario en el PR.')
+                sys.exit(1)
+            else:
+                print('Veredicto: PERMITIDO.')
+                sys.exit(0)
+        except Exception as e:
+            print(f'Error al verificar el veredicto: {e}')
+            sys.exit(1)
+        "

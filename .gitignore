@@ -1,0 +1,15 @@
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de prueba locales
+resultado.json
+modelo_malicioso.pkl
+pr_comment.md
+scan-results.json
