@@ -27,10 +27,10 @@ runs:
       shell: bash
       id: scan
       run: |
-        # Escaneamos el directorio actual con el formato correcto
+        # Ejecutamos el escaneo y redirigimos la salida JSON
         bee --format json scan . > scan-results.json || true
         
-        # Imprimimos el contenido para depurar en los logs de GitHub
+        # Imprimimos el contenido para depurar si algo falla
         echo "Contenido del JSON generado:"
         cat scan-results.json
       continue-on-error: true
@@ -42,7 +42,7 @@ runs:
         if [ -s scan-results.json ]; then
           python ${{ github.action_path }}/scripts/generate_comment.py scan-results.json
         else
-          echo "## Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
+          echo "## ⚠️ Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
         fi
 
     - name: Post comment to PR
@@ -57,23 +57,9 @@ runs:
       shell: bash
       run: |
         if [ -s scan-results.json ]; then
-          python -c "
-          import json, sys
-          try:
-              with open('scan-results.json', 'r') as f:
-                  data = json.load(f)
-              if data.get('verdict') == 'block':
-                  print('Veredicto: BLOQUEADO. Revisa el comentario en el PR.')
-                  sys.exit(1)
-              else:
-                  print('Veredicto: PERMITIDO.')
-                  sys.exit(0)
-          except Exception as e:
-              print(f'Error al verificar el veredicto: {e}')
-              sys.exit(1)
-          "
+          python ${{ github.action_path }}/scripts/check_gate.py
         else
-          echo "El archivo scan-results.json está vacío o no existe (No se encontraron modelos para escanear)."
-          echo "Omitiendo bloqueo de seguridad."
+          echo "El archivo scan-results.json está vacío o no existe."
+          echo "Omitiendo bloqueo de seguridad (exit 0)."
           exit 0
         fi
