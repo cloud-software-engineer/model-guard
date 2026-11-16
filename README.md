@@ -14,9 +14,6 @@ El 83.5% de los modelos en Hugging Face usan formatos basados en Pickle. Un solo
 ##  La Solución
 Escaneo estático (Zero-Execution) del flujo de opcodes de Pickle antes de que el modelo toque tu servidor.
 
-![Model Guard en acción](https://github.com/cloud-software-engineer/model-guard/assets/placeholder.png) 
-*(Nota: Sube la captura de pantalla del comentario BLOCKED que me enviaste a la sección de Issues o a una carpeta /assets y pon el enlace aquí).*
-
 ##  Quick Start (Empieza en 3 minutos)
 
 Añade el siguiente workflow a tu repositorio en `.github/workflows/model-security.yml`:
