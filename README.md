@@ -1,10 +1,21 @@
-# Model Guard
+#  Model Guard
 
 **La puerta de seguridad para los modelos de IA en tu pipeline de CI/CD.**
 
-Los modelos de IA descargados de repositorios públicos (como Hugging Face) a menudo vienen en formatos ejecutables como `.pkl` (Pickle). Estos archivos pueden contener código malicioso que se ejecuta silenciosamente al cargar el modelo en producción.
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Model%20Guard-purple.svg?logo=github)](https://github.com/marketplace) [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+Los modelos de IA descargados de repositorios públicos (como Hugging Face) a menudo vienen en formatos ejecutables como `.pkl` (Pickle). Estos archivos pueden contener código malicioso (Remote Code Execution) que se ejecuta silenciosamente al cargar el modelo en producción.
 
 **Model Guard** es una GitHub Action que escanea automáticamente los artefactos de tus modelos en cada Pull Request. Si detecta código malicioso, **bloquea el merge** y te deja un comentario explicativo en el PR.
+
+##  El Problema
+El 83.5% de los modelos en Hugging Face usan formatos basados en Pickle. Un solo archivo comprometido puede dar a un atacante acceso total a tu infraestructura.
+
+##  La Solución
+Escaneo estático (Zero-Execution) del flujo de opcodes de Pickle antes de que el modelo toque tu servidor.
+
+![Model Guard en acción](https://github.com/cloud-software-engineer/model-guard/assets/placeholder.png) 
+*(Nota: Sube la captura de pantalla del comentario BLOCKED que me enviaste a la sección de Issues o a una carpeta /assets y pon el enlace aquí).*
 
 ##  Quick Start (Empieza en 3 minutos)
 
@@ -30,6 +41,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-      - uses: cloud-software-engineer/model-guard@v1
+      - uses: cloud-software-engineer/model-guard@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
