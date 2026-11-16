@@ -37,7 +37,7 @@ runs:
         if [ -s scan-results.json ]; then
           python ${{ github.action_path }}/scripts/generate_comment.py scan-results.json
         else
-          echo "## Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
+          echo "## ⚠️ Model Guard: Error de escaneo o archivo no encontrado" > pr_comment.md
         fi
 
     - name: Post comment to PR
@@ -48,7 +48,7 @@ runs:
       run: |
         gh pr comment ${{ github.event.pull_request.number }} --body-file pr_comment.md
 
-        - name: Enforce gate (Fail if blocked)
+    - name: Enforce gate (Fail if blocked)
       shell: bash
       run: |
         if [ -s scan-results.json ]; then
